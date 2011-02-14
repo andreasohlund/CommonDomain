@@ -49,8 +49,15 @@ namespace CommonDomain.Core
 					string.Format("Cannot dispatch message. Message must be of type {0}", typeof(TEvent)), "eventMessage");
 
 			Action<TEvent> handler;
-			if (this.handlers.TryGetValue(eventMessage.GetType(), out handler))
+			var eventType = eventMessage.GetType();
+
+			if (this.handlers.TryGetValue(eventType, out handler))
 				handler((TEvent)eventMessage);
+
+			foreach(var @interface in eventType.GetInterfaces())
+				if (this.handlers.TryGetValue(@interface, out handler))
+					handler((TEvent)eventMessage);
+
 		}
 
 		private void Register(Type messageType, Action<TEvent> handler)

@@ -3,6 +3,7 @@
 
 namespace CommonDomain.AcceptanceTests
 {
+	using System;
 	using Core;
 	using Machine.Specifications;
 
@@ -49,6 +50,16 @@ namespace CommonDomain.AcceptanceTests
 
 		It should_not_call_the_apply_method = () =>
 			aggregate.ApplyForMessageDCalled.ShouldBeFalse();
+	}
+	[Subject("Routing Events")]
+	public class When_dispatching_a_interface_base_message_with_a_registered_aggregate_that_has_a_matching_apply_method :
+		With_a_convention_event_router_and_registered_aggregate<object>
+	{
+		Because of = () =>
+			router.Dispatch(new AutoGenereatedImpl());
+
+		It should_call_the_apply_method = () =>
+			aggregate.ApplyForInterfaceCalled.ShouldBeTrue();
 	}
 
 	[Subject("Routing Events")]
@@ -116,6 +127,7 @@ namespace CommonDomain.AcceptanceTests
 		public static bool ApplyForMessageCCalled { get; set; }
 		public bool ApplyForMessageDCalled { get; set; }
 		public bool ApplyForMessageECalled { get; set; }
+		public bool ApplyForInterfaceCalled { get; set; }
 
 		public void Apply(MessageA message)
 		{
@@ -136,6 +148,12 @@ namespace CommonDomain.AcceptanceTests
 		{
 			ApplyForMessageCCalled = true;
 		}
+
+		void Apply(InterfaceBasedMessage message)
+		{
+			ApplyForInterfaceCalled = true;
+		}
+
 
 		public int Apply(MessageE message)
 		{
@@ -166,6 +184,15 @@ namespace CommonDomain.AcceptanceTests
 	}
 
 	public class MessageF
+	{
+	}
+
+
+	public class AutoGenereatedImpl : InterfaceBasedMessage
+	{
+	}
+
+	public interface InterfaceBasedMessage
 	{
 	}
 }
